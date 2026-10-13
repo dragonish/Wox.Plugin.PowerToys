@@ -1,15 +1,15 @@
 {
-    "Id": "{{.Id}}",
+    "Id": "1ed04e7b-5a94-481e-ac27-74c11e34ec63",
     "TriggerKeywords": [
-        "{{.TriggerKeyword}}"
+        "pt"
     ],
-    "Name": "{{.Name}}",
-    "Description": "{{.Description}}",
-    "Author": "{{.Author}}",
+    "Name": "PowerToys",
+    "Description": "Allows the user to launch some PowerToys from Wox.",
+    "Author": "dragonish",
     "Version": "0.0.1",
     "MinWoxVersion": "2.0.0",
     "Runtime": "python",
-    "Website": "{{.Website}}",
+    "Website": "https://github.com/dragonish/Wox.Plugin.PowerToys",
     "Entry": "main.py",
     "Icon": "relative:images/app.svg",
     "SupportedOS": [
