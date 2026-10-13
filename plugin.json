@@ -10,8 +10,8 @@
     "MinWoxVersion": "2.0.0",
     "Runtime": "python",
     "Website": "https://github.com/dragonish/Wox.Plugin.PowerToys",
-    "Entry": "main.py",
-    "Icon": "relative:images/app.svg",
+    "Entry": "powertoys_main.py",
+    "Icon": "relative:images/powertoys.png",
     "SupportedOS": [
         "Windows"
     ]
