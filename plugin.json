@@ -4,7 +4,7 @@
         "pt"
     ],
     "Name": "PowerToys",
-    "Description": "Allows the user to launch some PowerToys from Wox.",
+    "Description": "i18n:plugin_desc",
     "Author": "dragonish",
     "Version": "0.0.1",
     "MinWoxVersion": "2.0.0",
@@ -14,5 +14,13 @@
     "Icon": "relative:images/powertoys.png",
     "SupportedOS": [
         "Windows"
-    ]
+    ],
+    "I18n": {
+        "en_US": {
+            "plugin_desc": "Allows the user to launch some PowerToys from Wox."
+        },
+        "zh_CN": {
+            "plugin_desc": "允许用户从 Wox 启动某些 PowerToys 程序。"
+        }
+    }
 }
