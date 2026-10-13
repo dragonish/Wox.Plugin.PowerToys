@@ -13,8 +13,6 @@
     "Entry": "main.py",
     "Icon": "relative:images/app.svg",
     "SupportedOS": [
-        "windows",
-        "linux",
-        "darwin"
+        "Windows"
     ]
 }
