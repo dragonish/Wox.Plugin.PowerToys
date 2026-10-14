@@ -12,7 +12,6 @@ from __future__ import annotations
 import asyncio
 import ctypes
 import json
-import locale
 import os
 import subprocess
 import time
@@ -263,112 +262,6 @@ _ACTIONS: list[UtilityAction] = [
 ]
 
 
-_STRINGS_EN: dict[str, str] = {
-    "powertoys_not_running": "PowerToys is not running",
-    "powertoys_not_running_subtitle": "Make sure PowerToys is installed and running before using this plugin.",
-    "open_settings": "Open Settings for this Utility",
-    "run_as_administrator": "Run as Administrator",
-    "keywords": "Keywords",
-    "settings": "Open PowerToys Settings",
-    "screen_ruler": "Screen Ruler",
-    "shortcut_guide": "Shortcut Guide",
-    "shortcut_guide_win_key_hold": "Trigger Hold The Win Key",
-    "color_picker": "Show Color Picker",
-    "always_on_top_pin": "Pin Always On Top",
-    "always_on_top_increase_opacity": "Increases Opacity Of Top Window Border",
-    "always_on_top_decrease_opacity": "Decrease Opacity Of Top Window Border",
-    "text_extractor": "Extract Text",
-    "fancy_zones": "Fancy Zones Editor",
-    "hosts_file_editor": "Hosts File Editor",
-    "registry_preview": "Registry Preview",
-    "workspaces": "Workspaces Editor",
-    "crop_and_lock_reparent": "Crop And Lock - Reparent",
-    "crop_and_lock_thumbnail": "Crop And Lock - Thumbnail",
-    "crop_and_lock_screenshot": "Crop And Lock - Screenshot",
-    "environment_variables": "Environment Variables",
-    "powertoys_run": "PowerToys Run",
-    "command_palette": "Show Command Palette",
-    "awake_exit": "Exit Awake",
-    "advanced_paste_show_ui": "Show Advanced Paste UI",
-    "find_my_mouse": "Find My Mouse",
-    "mouse_highlighter": "Mouse Highlighter",
-    "mouse_crosshairs": "Mouse Crosshairs",
-    "cursor_wrap": "Cursor Wrap",
-    "light_switch_toggle": "Light Switch Toggle",
-    "light_switch_light_theme": "Switch To Light Theme",
-    "light_switch_dark_theme": "Switch To Dark Theme",
-    "zoomit_refresh_settings": "ZoomIt Refresh Settings",
-    "zoomit_exit": "ZoomIt Exit",
-    "zoomit_zoom": "ZoomIt Zoom",
-    "zoomit_draw": "ZoomIt Draw",
-    "zoomit_break": "ZoomIt Break",
-    "zoomit_live_zoom": "ZoomIt Live Zoom",
-    "zoomit_snip": "ZoomIt Snip",
-    "zoomit_snip_ocr": "ZoomIt Snip OCR",
-    "zoomit_record": "ZoomIt Record",
-    "open_new_keyboard_manager": "Open New Keyboard Manager",
-    "toggle_easy_mouse": "Toggle Easy Mouse",
-    "reconnect_mouse": "Reconnect Mouse",
-    "power_display_tooggle": "Toggle Profile",
-    "power_display_terminate": "Terminate Power Display",
-    "power_display_refresh_monitors": "Refresh Monitors",
-    "power_display_rescan_monitors": "Rescan Monitors",
-    "grab_and_move_exit": "Exit Grab And Move",
-}
-
-_STRINGS_ZH: dict[str, str] = {
-    "powertoys_not_running": "PowerToys 未在运行中",
-    "powertoys_not_running_subtitle": "确保在使用此插件前已安装并运行了 PowerToys。",
-    "open_settings": "打开此实用工具的设置",
-    "run_as_administrator": "以管理员身份运行",
-    "keywords": "关键词",
-    "settings": "打开 PowerToys 设置",
-    "screen_ruler": "屏幕标尺",
-    "shortcut_guide": "快捷键指南",
-    "shortcut_guide_win_key_hold": "触发按住 Win 键",
-    "color_picker": "显示颜色选取器",
-    "always_on_top_pin": "保持窗口始终置顶",
-    "always_on_top_increase_opacity": "增加已置顶窗口边框不透明度",
-    "always_on_top_decrease_opacity": "减少已置顶窗口边框不透明度",
-    "text_extractor": "提取文本",
-    "fancy_zones": "Fancy Zones 编辑器",
-    "hosts_file_editor": "Hosts 文件编辑器",
-    "registry_preview": "注册表预览",
-    "workspaces": "工作区编辑器",
-    "crop_and_lock_reparent": "窗口裁剪器 - 重定父级",
-    "crop_and_lock_thumbnail": "窗口裁剪器 - 缩略图",
-    "crop_and_lock_screenshot": "窗口裁剪器 - 截图",
-    "environment_variables": "环境变量",
-    "powertoys_run": "PowerToys Run",
-    "command_palette": "显示命令面板",
-    "awake_exit": "退出唤醒",
-    "advanced_paste_show_ui": "显示高级粘贴窗口",
-    "find_my_mouse": "查找我的鼠标",
-    "mouse_highlighter": "鼠标荧光笔",
-    "mouse_crosshairs": "鼠标指针十字线",
-    "cursor_wrap": "指针环绕",
-    "light_switch_toggle": "切换主题",
-    "light_switch_light_theme": "切换到浅色主题",
-    "light_switch_dark_theme": "切换到深色主题",
-    "zoomit_refresh_settings": "ZoomIt 刷新设置",
-    "zoomit_exit": "ZoomIt 退出",
-    "zoomit_zoom": "ZoomIt 缩放",
-    "zoomit_draw": "ZoomIt 绘制",
-    "zoomit_break": "ZoomIt 休息",
-    "zoomit_live_zoom": "ZoomIt 实时缩放",
-    "zoomit_snip": "ZoomIt 截图",
-    "zoomit_snip_ocr": "ZoomIt 截图 OCR",
-    "zoomit_record": "ZoomIt 录制",
-    "open_new_keyboard_manager": "打开新键盘管理器",
-    "toggle_easy_mouse": "切换 Easy Mouse",
-    "reconnect_mouse": "重新连接无界鼠标",
-    "power_display_tooggle": "切换配置文件",
-    "power_display_terminate": "终止 Power Display",
-    "power_display_refresh_monitors": "刷新监视器",
-    "power_display_rescan_monitors": "重新扫描监视器",
-    "grab_and_move_exit": "停用抓取并移动",
-}
-
 _ICON_URL_BASE = "https://cdn.jsdelivr.net/gh/microsoft/PowerToys/src/settings-ui/Settings.UI/Assets/Settings/Icons/"
 
 
@@ -467,15 +360,19 @@ class PowerToysPlugin(Plugin):
     def __init__(self) -> None:
         self._settings = PowerToysSettings()
         self._icon_cache: dict[str, WoxImage] = {}
-        lang = (locale.getdefaultlocale()[0] or "").lower()
-        self._strings = _STRINGS_ZH if lang.startswith("zh") else _STRINGS_EN
+        # Cache of translations fetched from the host, keyed by i18n key.
+        self._translations: dict[str, str] = {}
 
     async def init(self, ctx: Context, init_params: PluginInitParams) -> None:
         self.api = init_params.api
         self._settings.refresh()
 
-    def _tr(self, key: str) -> str:
-        return self._strings.get(key, key)
+    async def _t(self, ctx: Context, key: str) -> str:
+        """Fetch a translation (cached); only needed where formatting or the
+        raw text is required. Display-only strings use the ``i18n:`` prefix."""
+        if key not in self._translations:
+            self._translations[key] = await self.api.get_translation(ctx, key)
+        return self._translations[key]
 
     def _enabled_actions(self) -> list[UtilityAction]:
         self._settings.refresh()
@@ -489,9 +386,9 @@ class PowerToysPlugin(Plugin):
                 actions.append(action)
         return actions
 
-    def _make_result(self, action: UtilityAction, score: float) -> Result:
-        title = self._tr(action.title_key)
-        sub_title = f"{self._tr('keywords')}: {' '.join(action.keywords)}" if action.keywords else ""
+    async def _make_result(self, ctx: Context, action: UtilityAction, score: float) -> Result:
+        title = f"i18n:{action.title_key}"
+        sub_title = f"{await self._t(ctx, 'keywords')}: {' '.join(action.keywords)}" if action.keywords else ""
         icon = _resolve_icon(action.icon, self._icon_cache)
         actions: list[ResultAction] = []
         if action.open_settings_only:
@@ -516,7 +413,7 @@ class PowerToysPlugin(Plugin):
             )
             actions.append(
                 ResultAction(
-                    name=self._tr("open_settings"),
+                    name="i18n:open_settings",
                     icon=icon,
                     context_data={"op": "open_settings", "settings_link": action.settings_link},
                     action=self._on_action,
@@ -525,7 +422,7 @@ class PowerToysPlugin(Plugin):
             if action.admin_event:
                 actions.append(
                     ResultAction(
-                        name=self._tr("run_as_administrator"),
+                        name="i18n:run_as_administrator",
                         icon=icon,
                         context_data={"op": "trigger", "event": action.admin_event},
                         action=self._on_action,
@@ -544,7 +441,7 @@ class PowerToysPlugin(Plugin):
         elif op == "open_settings":
             exe = _find_powertoys_exe()
             if not exe:
-                await self.api.notify(ctx, "PowerToys.exe not found")
+                await self.api.notify(ctx, await self._t(ctx, "powertoys_exe_not_found"))
                 return
             subprocess.Popen([exe, f"--open-settings={ac.context_data.get('settings_link', '')}"])
 
@@ -552,8 +449,8 @@ class PowerToysPlugin(Plugin):
         if not _is_powertoys_running():
             return [
                 Result(
-                    title=self._tr("powertoys_not_running"),
-                    sub_title=self._tr("powertoys_not_running_subtitle"),
+                    title="i18n:powertoys_not_running",
+                    sub_title="i18n:powertoys_not_running_subtitle",
                     icon=WoxImage.new_relative("images/powertoys.png"),
                 )
             ]
@@ -564,7 +461,8 @@ class PowerToysPlugin(Plugin):
             matched = [
                 a
                 for a in actions
-                if all(any(term in keyword for keyword in a.keywords) for term in terms) or search in self._tr(a.title_key).lower()
+                if all(any(term in keyword for keyword in a.keywords) for term in terms)
+                or search in (await self._t(ctx, a.title_key)).lower()
             ]
         else:
             matched = actions
@@ -573,7 +471,7 @@ class PowerToysPlugin(Plugin):
         score = float(max(len(matched), 100))
         results: list[Result] = []
         for action in matched:
-            results.append(self._make_result(action, score))
+            results.append(await self._make_result(ctx, action, score))
             score -= 1.0
         return results
 
