@@ -239,7 +239,7 @@ _ACTIONS: list[UtilityAction] = [
         "toggle_easy_mouse", Events.ToggleEasyMouseEvent, ("toggle", "easy", "mouse"), "MouseWithoutBorders.png", "MouseWithoutBorders"
     ),
     UtilityAction("reconnect_mouse", Events.ReconnectEvent, ("reconnect", "mouse"), "MouseWithoutBorders.png", "MouseWithoutBorders"),
-    UtilityAction("power_display_tooggle", Events.PowerDisplayToggleEvent, ("display", "tooggle"), "PowerDisplay.png", "PowerDisplay"),
+    UtilityAction("power_display_toggle", Events.PowerDisplayToggleEvent, ("display", "toggle"), "PowerDisplay.png", "PowerDisplay"),
     UtilityAction(
         "power_display_terminate", Events.PowerDisplayTerminateEvent, ("display", "terminate"), "PowerDisplay.png", "PowerDisplay"
     ),
