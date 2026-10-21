@@ -296,6 +296,7 @@ def _is_powertoys_running() -> bool:
             capture_output=True,
             text=True,
             timeout=10,
+            check=False,
         )
     except (OSError, subprocess.SubprocessError):
         return False
