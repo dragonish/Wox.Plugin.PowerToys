@@ -21,15 +21,14 @@ wpm install PowerToys
 - Measure Tool
 - Shortcut Guide
 - Color Picker
-- Always on Top
+- Always on Top - Pin / Increase Opacity / Decrease Opacity
 - Extract Text
 - Fancy Zones Editor
 - Hosts Editor
 - Registry Preview
+- Peek
 - Workspaces
-- Crop and Lock - Reparent
-- Crop and Lock - Thumbnail
-- Crop and Lock - Screenshot
+- Crop and Lock - Reparent / Thumbnail / Screenshot
 - Environment Variables
 - Exit Awake
 - Show Advanced Paste UI
@@ -37,11 +36,12 @@ wpm install PowerToys
 - Mouse Highlighter
 - Mouse Crosshairs
 - Cursor Wrap
+- Mouse Jump
 - Light Switch Toggle
-- ZoomIt
+- ZoomIt - Exit / Zoom / Draw / Break / Live Zoom / Snip / Snip OCR / Snip & Dictate / Record
 - Keyboard Manager
-- MouseWithoutBorders
-- Power Display
+- MouseWithoutBorders - Toggle Easy Mouse / Reconnect
+- Power Display - Toggle Profile / Terminate / Refresh Monitors / Rescan Monitors
 - Grab And Move
 - PowerToys Settings
 
@@ -51,6 +51,22 @@ wpm install PowerToys
 - Most utilities have a context menu item for opening the settings window for that utility
 - Only utilities that are enabled in the PowerToys settings are shown
 - Shows a warning if PowerToys is not running on your system
+
+## How it works
+
+Each action signals a named event that PowerToys itself waits on, so it behaves
+exactly like pressing the utility's shortcut. "Run as Administrator" needs no
+elevation code: it signals the utility's dedicated `*Admin` event and PowerToys
+elevates itself.
+
+The event names are copied verbatim from
+[`src/common/interop/shared_constants.h`](https://github.com/microsoft/PowerToys/blob/main/src/common/interop/shared_constants.h)
+and only cover events that PowerToys listens for (inbound). Internal or outbound
+events are intentionally not exposed, for example the LightSwitch -> PowerDisplay
+theme notifications, which do not switch the system theme.
+
+If a future PowerToys release renames or removes an event, that single action
+stops working and the plugin logs a warning instead of failing silently.
 
 ## Credits
 
