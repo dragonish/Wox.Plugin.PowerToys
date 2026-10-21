@@ -15,6 +15,7 @@ import json
 import os
 import subprocess
 import time
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 from wox_plugin import (
@@ -439,6 +440,117 @@ _ACTIONS: list[UtilityAction] = [
 ]
 
 
+# Pinyin search index keyed by title_key. Each entry holds the full pinyin and
+# initials for every Han run in the zh_CN title, so "ys" and "yanse" both find
+# the Color Picker title. Wox does not expose its own pinyin matcher to Python
+# plugins, so the plugin keeps this small index instead of adding a runtime
+# dependency.
+_PINYIN_INDEX: dict[str, tuple[str, ...]] = {
+    "screen_ruler": ("pingmubiaochi", "pmbc"),
+    "shortcut_guide": ("kuaijiejianzhinan", "kjjzn"),
+    "shortcut_guide_win_key_hold": ("chufaanzhu", "cfaz", "jian"),
+    "color_picker": ("xianshiyansexuanquqi", "xsysxqq"),
+    "always_on_top_pin": ("baochichuangkoushizhongzhiding", "bcckszzd"),
+    "always_on_top_increase_opacity": ("zengjiayizhidingchuangkoubiankuangbutoumingdu", "zjyzdckbkbtmd"),
+    "always_on_top_decrease_opacity": ("jianshaoyizhidingchuangkoubiankuangbutoumingdu", "jsyzdckbkbtmd"),
+    "text_extractor": ("tiquwenben", "tqwb"),
+    "fancy_zones": ("bianjiqi", "bjq"),
+    "hosts_file_editor": ("wenjianbianjiqi", "wjbjq"),
+    "registry_preview": ("zhucebiaoyulan", "zcbyl"),
+    "peek": ("kuaisuyulan", "ksyl"),
+    "workspaces": ("gongzuoqubianjiqi", "gzqbjq"),
+    "crop_and_lock_reparent": ("chuangkoucaijianqi", "ckcjq", "chongdingfuji", "cdfj"),
+    "crop_and_lock_thumbnail": ("chuangkoucaijianqi", "ckcjq", "suolvetu", "suoluetu", "slt"),
+    "crop_and_lock_screenshot": ("chuangkoucaijianqi", "ckcjq", "jietu", "jt"),
+    "environment_variables": ("huanjingbianliang", "hjbl"),
+    "command_palette": ("xianshiminglingmianban", "xsmlmb"),
+    "awake_exit": ("tuichuhuanxing", "tchx"),
+    "advanced_paste_show_ui": ("xianshigaojizhantiechuangkou", "xsgjztck"),
+    "find_my_mouse": ("chazhaowodeshubiao", "czwdsb"),
+    "mouse_highlighter": ("shubiaoyingguangbi", "sbygb"),
+    "mouse_crosshairs": ("shubiaozhizhenshizixian", "sbzzszx"),
+    "cursor_wrap": ("zhizhenhuanrao", "zzhr"),
+    "mouse_jump": ("shubiaotiaozhuan", "sbtz"),
+    "light_switch_toggle": ("qiehuanzhuti", "qhzt"),
+    "zoomit_exit": ("tuichu", "tc"),
+    "zoomit_zoom": ("suofang", "sf"),
+    "zoomit_draw": ("huizhi", "hz"),
+    "zoomit_break": ("xiuxi", "xx"),
+    "zoomit_live_zoom": ("shishisuofang", "sssf"),
+    "zoomit_snip": ("jietu", "jt"),
+    "zoomit_snip_ocr": ("jietu", "jt"),
+    "zoomit_snip_dictate": ("jietutingxie", "jttx"),
+    "zoomit_record": ("luzhi", "lz"),
+    "open_new_keyboard_manager": ("dakaixinjianpanguanliqi", "dkxjpglq"),
+    "toggle_easy_mouse": ("qiehuan", "qh"),
+    "reconnect_mouse": ("chongxinlianjiewujieshubiao", "cxljwjsb"),
+    "power_display_toggle": ("qiehuanpeizhiwenjian", "qhpzwj"),
+    "power_display_terminate": ("zhongzhi", "zz"),
+    "power_display_refresh_monitors": ("shuaxinjianshiqi", "sxjsq"),
+    "power_display_rescan_monitors": ("chongxinsaomiaojianshiqi", "cxsmjsq"),
+    "grab_and_move_exit": ("tingyongzhuaqubingyidong", "tyzqbyd"),
+    "settings": ("dakai", "dk", "shezhi", "sz"),
+}
+
+
+def _match_quality(term: str, candidates: Sequence[str]) -> int:
+    """Return 3 for an exact match, 2 for a prefix, 1 for a substring, else 0."""
+    best = 0
+    for candidate in candidates:
+        candidate = candidate.strip().lower()
+        if not candidate:
+            continue
+        if candidate == term:
+            return 3
+        if candidate.startswith(term):
+            best = max(best, 2)
+        elif term in candidate:
+            best = max(best, 1)
+    return best
+
+
+def _match_actions(
+    actions: Sequence[UtilityAction],
+    search: str,
+    titles: Mapping[str, str],
+) -> list[tuple[UtilityAction, int]]:
+    """Rank actions by keywords, localized titles, and bundled pinyin data.
+
+    Multi-word queries use AND semantics: every term must match somewhere.
+    The weakest term decides the score tier, while the sum breaks ties.
+
+    Scores must stay integral: Wox unmarshals ``Score`` into a Go int64 and
+    rejects JSON floats such as ``125.0`` just like ``125.237``.
+    """
+    search = search.strip().lower()
+    if not search:
+        top_score = max(len(actions), 100)
+        return [(action, top_score - index) for index, action in enumerate(actions)]
+
+    terms = search.split()
+    matches: list[tuple[UtilityAction, int]] = []
+    for action in actions:
+        title = titles.get(action.title_key, "")
+        pinyin = _PINYIN_INDEX.get(action.title_key, ())
+        qualities: list[int] = []
+        for term in terms:
+            keyword_quality = _match_quality(term, (*action.keywords, title))
+            pinyin_quality = _match_quality(term, pinyin)
+            if keyword_quality == 0 and pinyin_quality == 0:
+                break
+            # Prefer a deliberate pinyin hit (for example "ys" for Color Picker)
+            # over an accidental substring in an English keyword like "always".
+            pinyin_score = pinyin_quality * 10 + 5 if pinyin_quality else 0
+            qualities.append(max(keyword_quality * 10, pinyin_score))
+        else:
+            # Keep scores near the previous 100-based range so Wox's usage
+            # ranking still has room to reorder results.
+            score = 100 + min(qualities) + sum(qualities) // 10
+            matches.append((action, score))
+    matches.sort(key=lambda item: item[1], reverse=True)
+    return matches
+
+
 _ICON_URL_BASE = "https://cdn.jsdelivr.net/gh/microsoft/PowerToys/src/settings-ui/Settings.UI/Assets/Settings/Icons/"
 
 
@@ -575,7 +687,7 @@ class PowerToysPlugin(Plugin):
                 actions.append(action)
         return actions
 
-    async def _make_result(self, ctx: Context, action: UtilityAction, score: float) -> Result:
+    async def _make_result(self, ctx: Context, action: UtilityAction, score: int) -> Result:
         title = f"i18n:{action.title_key}"
         sub_title = f"{await self._t(ctx, 'keywords')}: {' '.join(action.keywords)}" if action.keywords else ""
         icon = _resolve_icon(action.icon, self._icon_cache)
@@ -617,7 +729,7 @@ class PowerToysPlugin(Plugin):
                         action=self._on_action,
                     )
                 )
-        return Result(title=title, sub_title=sub_title, icon=icon, score=score, actions=actions)
+        return Result(title=title, sub_title=sub_title, icon=icon, score=score, group_score=0, actions=actions)
 
     async def _on_action(self, ctx: Context, ac: ActionContext) -> None:
         op = ac.context_data.get("op", "")
@@ -641,27 +753,18 @@ class PowerToysPlugin(Plugin):
                     title="i18n:powertoys_not_running",
                     sub_title="i18n:powertoys_not_running_subtitle",
                     icon=WoxImage.new_relative("images/powertoys.png"),
+                    score=0,
+                    group_score=0,
                 )
             ]
         actions = self._enabled_actions()
-        search = (query.search or "").strip().lower()
-        if search:
-            terms = search.split()
-            matched = [
-                a
-                for a in actions
-                if all(any(term in keyword for keyword in a.keywords) for term in terms)
-                or search in (await self._t(ctx, a.title_key)).lower()
-            ]
-        else:
-            matched = actions
-        # Decreasing base scores keep the original utility order; Wox's own
-        # usage-based reordering still applies on top (no ignoreAutoScore).
-        score = float(max(len(matched), 100))
+        search = (query.search or "").strip()
+        titles = {action.title_key: await self._t(ctx, action.title_key) for action in actions} if search else {}
+        # Decreasing base scores keep the original utility order for empty
+        # queries; matching queries rank keyword/title/pinyin quality first.
         results: list[Result] = []
-        for action in matched:
+        for action, score in _match_actions(actions, search, titles):
             results.append(await self._make_result(ctx, action, score))
-            score -= 1.0
         return results
 
 

@@ -50,6 +50,7 @@ wpm install PowerToys
 - Some utilities have a context menu item for launching the given app as an admin
 - Most utilities have a context menu item for opening the settings window for that utility
 - Only utilities that are enabled in the PowerToys settings are shown
+- Chinese utility titles can be searched by full pinyin or pinyin initials, for example `pt yanse` or `pt ys`
 - Shows a warning if PowerToys is not running on your system
 
 ## How it works
