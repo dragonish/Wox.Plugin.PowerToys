@@ -3,7 +3,7 @@ name = "wox-plugin-powertoys-python"
 version = "0.0.1"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["wox-plugin==0.0.89"]
+dependencies = ["wox-plugin==0.0.92"]
 
 [project.optional-dependencies]
 dev = ["ruff", "mypy"]
